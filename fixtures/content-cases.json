@@ -1,0 +1,440 @@
+[
+  {
+    "name": "whatsapp-conversation",
+    "channel": "whatsapp",
+    "input": {
+      "body": {
+        "event": "MESSAGES.UPSERT",
+        "data": {
+          "messageType": "conversation",
+          "message": {
+            "conversation": "Mensagem sintetica"
+          },
+          "status": "DELIVERY_ACK"
+        }
+      }
+    },
+    "expected": {
+      "event_type": "messages.upsert",
+      "is_status_event": false,
+      "text": "Mensagem sintetica",
+      "message_type": "text",
+      "message_status": "DELIVERY_ACK"
+    },
+    "synthetic": true
+  },
+  {
+    "name": "whatsapp-ack-without-content",
+    "channel": "whatsapp",
+    "input": {
+      "body": {
+        "event": "messages.upsert",
+        "data": {
+          "status": "READ"
+        }
+      }
+    },
+    "expected": {
+      "event_type": "messages.upsert",
+      "is_status_event": true,
+      "text": "",
+      "message_type": "unknown",
+      "message_status": "READ"
+    },
+    "synthetic": true
+  },
+  {
+    "name": "whatsapp-status-event-with-text",
+    "channel": "whatsapp",
+    "input": {
+      "body": {
+        "event": "messages.update",
+        "data": {
+          "message": {
+            "conversation": "Texto sintetico"
+          }
+        }
+      }
+    },
+    "expected": {
+      "event_type": "messages.update",
+      "is_status_event": true,
+      "text": "Texto sintetico",
+      "message_type": "text",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "whatsapp-extended-text",
+    "channel": "whatsapp",
+    "input": {
+      "body": {
+        "event": "messages.upsert",
+        "data": {
+          "message": {
+            "extendedTextMessage": {
+              "text": "Texto sintetico extendido"
+            }
+          }
+        }
+      }
+    },
+    "expected": {
+      "event_type": "messages.upsert",
+      "is_status_event": false,
+      "text": "Texto sintetico extendido",
+      "message_type": "text",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "whatsapp-audio-mime",
+    "channel": "whatsapp",
+    "input": {
+      "body": {
+        "event": "messages.upsert",
+        "mime_type": "audio/ogg"
+      }
+    },
+    "expected": {
+      "event_type": "messages.upsert",
+      "is_status_event": false,
+      "text": "",
+      "message_type": "audio",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "whatsapp-text-precedence",
+    "channel": "whatsapp",
+    "input": {
+      "body": {
+        "event_type": "CUSTOM",
+        "text": "Primeiro texto sintetico",
+        "data": {
+          "message": {
+            "conversation": "Segundo texto sintetico"
+          }
+        }
+      }
+    },
+    "expected": {
+      "event_type": "custom",
+      "is_status_event": false,
+      "text": "Primeiro texto sintetico",
+      "message_type": "text",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "whatsapp-image-object-without-mime-remains-unknown",
+    "channel": "whatsapp",
+    "input": {
+      "body": {
+        "event": "messages.upsert",
+        "data": {
+          "message": {
+            "imageMessage": {}
+          },
+          "messageType": "imageMessage"
+        }
+      }
+    },
+    "expected": {
+      "event_type": "messages.upsert",
+      "is_status_event": false,
+      "text": "",
+      "message_type": "unknown",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "whatsapp-empty",
+    "channel": "whatsapp",
+    "input": {},
+    "expected": {
+      "event_type": "",
+      "is_status_event": false,
+      "text": "",
+      "message_type": "unknown",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-trimmed-text",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "message": {
+                  "text": "  Mensagem sintetica  "
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "message",
+      "is_status_event": false,
+      "text": "Mensagem sintetica",
+      "message_type": "text",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-audio",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "message": {
+                  "attachments": [
+                    {
+                      "type": "audio"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "message",
+      "is_status_event": false,
+      "text": "[audio recebido]",
+      "message_type": "audio",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-image-and-caption",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "message": {
+                  "text": "Legenda sintetica",
+                  "attachments": [
+                    {
+                      "type": "image"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "message",
+      "is_status_event": false,
+      "text": "Legenda sintetica",
+      "message_type": "image",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-deleted",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "message": {
+                  "is_deleted": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "message_deleted",
+      "is_status_event": true,
+      "text": "",
+      "message_type": "deleted",
+      "message_status": "deleted"
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-echo",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "message": {
+                  "is_echo": true,
+                  "text": "Eco sintetico"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "message",
+      "is_status_event": false,
+      "text": "Eco sintetico",
+      "message_type": "echo",
+      "message_status": "echo"
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-read",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "read": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "read",
+      "is_status_event": true,
+      "text": "",
+      "message_type": "unknown",
+      "message_status": "read"
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-delivery",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "delivery": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "delivery",
+      "is_status_event": true,
+      "text": "",
+      "message_type": "unknown",
+      "message_status": "delivered"
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-unsupported-attachment",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "message": {
+                  "attachments": [
+                    {
+                      "type": "synthetic-unsupported"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "message",
+      "is_status_event": false,
+      "text": "",
+      "message_type": "unsupported",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-only-first-event-is-classified",
+    "channel": "instagram-dm",
+    "input": {
+      "body": {
+        "entry": [
+          {
+            "messaging": [
+              {
+                "message": {
+                  "text": "Primeiro evento sintetico"
+                }
+              },
+              {
+                "message": {
+                  "text": "Segundo evento sintetico"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "event_type": "message",
+      "is_status_event": false,
+      "text": "Primeiro evento sintetico",
+      "message_type": "text",
+      "message_status": ""
+    },
+    "synthetic": true
+  },
+  {
+    "name": "instagram-empty",
+    "channel": "instagram-dm",
+    "input": {},
+    "expected": {
+      "event_type": "unknown",
+      "is_status_event": false,
+      "text": "",
+      "message_type": "unknown",
+      "message_status": ""
+    },
+    "synthetic": true
+  }
+]

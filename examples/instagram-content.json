@@ -1,0 +1,47 @@
+{
+  "name": "Offline demo - instagram-content",
+  "active": false,
+  "nodes": [
+    {
+      "id": "demo-manual-trigger",
+      "name": "Manual demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "demo-content-normalizer",
+      "name": "Normalize synthetic content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Entrada inteiramente sintetica; esta demonstracao nao recebe webhooks.\n/**\n * Derivado exclusivamente de cinco expressoes do node Dados.\n * Opera em memoria, sem identidade, persistencia ou efeitos externos.\n */\nfunction normalizeInstagramContent(input = {}) {\n  const body = input?.body;\n  return {\n    event_type: ((() => {\n  const event = body?.entry?.[0]?.messaging?.[0] || {};\n  if (event.message?.is_deleted === true) return 'message_deleted';\n  if (event.message) return 'message';\n  if (event.read) return 'read';\n  if (event.delivery) return 'delivery';\n  if (event.postback) return 'postback';\n  return 'unknown';\n})()),\n    is_status_event: ((() => {\n  const event = body?.entry?.[0]?.messaging?.[0] || {};\n  return event.message?.is_deleted === true || !!event.read || !!event.delivery;\n})()),\n    text: ((() => {\n  const message = body?.entry?.[0]?.messaging?.[0]?.message || {};\n  const rawText = String(message?.text || '').trim();\n  if (rawText) return rawText;\n  const attachment = Array.isArray(message?.attachments) ? message.attachments[0] : null;\n  const type = String(attachment?.type || '').toLowerCase();\n  if (type === 'image') return '[imagem recebida]';\n  if (type === 'audio') return '[audio recebido]';\n  if (type === 'video') return '[video recebido]';\n  if (type === 'file') return '[arquivo recebido]';\n  return '';\n})()),\n    message_type: ((() => {\n  const message = body?.entry?.[0]?.messaging?.[0]?.message || {};\n  if (message?.is_deleted === true) return 'deleted';\n  if (message?.is_echo === true) return 'echo';\n  const text = String(message?.text || '').trim();\n  const attachment = Array.isArray(message?.attachments) ? message.attachments[0] : null;\n  const type = String(attachment?.type || '').toLowerCase();\n  if (type === 'audio') return 'audio';\n  if (type === 'image') return 'image';\n  if (type === 'video') return 'video';\n  if (type === 'file') return 'file';\n  if (type) return 'unsupported';\n  if (text) return 'text';\n  return 'unknown';\n})()),\n    message_status: ((() => {\n  const event = body?.entry?.[0]?.messaging?.[0] || {};\n  if (event.message?.is_deleted === true) return 'deleted';\n  if (event.message?.is_echo === true) return 'echo';\n  if (event.read) return 'read';\n  if (event.delivery) return 'delivered';\n  return '';\n})()),\n  };\n}\n\nconst syntheticInput = {\n  \"body\": {\n    \"entry\": [\n      {\n        \"messaging\": [\n          {\n            \"message\": {\n              \"text\": \"  Mensagem sintetica  \"\n            }\n          }\n        ]\n      }\n    ]\n  }\n};\nreturn [{ json: normalizeInstagramContent(syntheticInput) }];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Manual demo": {
+      "main": [
+        [
+          {
+            "node": "Normalize synthetic content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "Offline demo - whatsapp-content",
+  "active": false,
+  "nodes": [
+    {
+      "id": "demo-manual-trigger",
+      "name": "Manual demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "demo-content-normalizer",
+      "name": "Normalize synthetic content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Entrada inteiramente sintetica; esta demonstracao nao recebe webhooks.\n/**\n * Derivado exclusivamente de cinco expressoes do node Dados.\n * Opera em memoria, sem identidade, persistencia ou efeitos externos.\n */\nfunction normalizeWhatsappContent(input = {}) {\n  const body = input?.body;\n  return {\n    event_type: (String(body?.event || body?.event_type || '').toLowerCase()),\n    is_status_event: ((() => {\n  const event = String(body?.event || '').toLowerCase();\n  const status = String(body?.data?.status || '').toLowerCase();\n  const hasContent = Boolean(\n    body?.data?.message?.conversation ||\n    body?.data?.message?.extendedTextMessage?.text ||\n    body?.data?.message?.imageMessage ||\n    body?.data?.message?.audioMessage ||\n    body?.data?.message?.videoMessage ||\n    body?.data?.message?.documentMessage\n  );\n\n  return /presence|typing|reaction|receipt|message\\.update|messages\\.update|status/.test(event)\n    || ((/delivery|delivered|read|played|ack/.test(status)) && !hasContent);\n})()),\n    text: (body?.text || body?.message?.text || body?.data?.message?.text || body?.data?.text || body?.data?.body || body?.body || body?.message?.conversation || body?.data?.message?.conversation || body?.data?.message?.extendedTextMessage?.text || body?.caption || ''),\n    message_type: ((() => { const payloadType = String(body?.data?.messageType || '').toLowerCase(); const text = String(body?.data?.message?.conversation || body?.data?.message?.extendedTextMessage?.text || body?.text || body?.message?.text || body?.data?.message?.text || body?.data?.text || body?.data?.body || body?.body || body?.caption || ''); const mime = String(body?.mime_type || body?.mimetype || body?.message?.mimetype || body?.data?.message?.mimetype || body?.data?.mimetype || ''); const type = String(body?.type || body?.message_type || body?.data?.type || '').toLowerCase(); if (payloadType === 'conversation') return 'text'; if (/audio/i.test(mime) || type === 'audio') return 'audio'; if (/image/i.test(mime) || type === 'image') return 'image'; if (text) return 'text'; return 'unknown'; })()),\n    message_status: (body?.data?.status || ''),\n  };\n}\n\nconst syntheticInput = {\n  \"body\": {\n    \"event\": \"MESSAGES.UPSERT\",\n    \"data\": {\n      \"messageType\": \"conversation\",\n      \"message\": {\n        \"conversation\": \"Mensagem sintetica\"\n      },\n      \"status\": \"DELIVERY_ACK\"\n    }\n  }\n};\nreturn [{ json: normalizeWhatsappContent(syntheticInput) }];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Manual demo": {
+      "main": [
+        [
+          {
+            "node": "Normalize synthetic content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

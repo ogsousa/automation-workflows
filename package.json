@@ -1,0 +1,11 @@
+{
+  "name": "automation-workflows-content-demos",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Recortes offline de normalizacao de conteudo derivados de workflows n8n reais.",
+  "scripts": {
+    "test": "node --test",
+    "validate": "node scripts/validate.mjs"
+  }
+}
